@@ -50,28 +50,28 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "efs_subnet" {
   cidr_block = "${cidr_subnet(vpc.vpc.cidr_block, 8, 1)}" # 10.0.1.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.primaryregion}a"
 }
 
 resource "aws_subnet" "ec2_subnet_1a" {
   cidr_block = "${cidr_subnet(vpc.vpc.cidr_block, 8, 2)}" # 10.0.2.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.primaryregion}a"
 }
 resource "aws_subnet" "ec2_subnet_1b" {
   cidr_block = "${cidr_subnet(vpc.vpc.cidr_block, 8, 3)}" # 10.0.3.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.primaryregion}b"
 }
 resource "aws_subnet" "ec2_subnet_1c" {
   cidr_block = "${cidr_subnet(vpc.vpc.cidr_block, 8, 4)}" # 10.0.4.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.primaryregion}c"
 }
 resource "aws_subnet" "rds_subnet" {
   cidr_block = "${cidr_subnet(vpc.vpc.cidr_block, 8, 5)}" # 10.0.5.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.primaryregion}d"
 }
 resource "aws_security_group" "efs_security_group" {
   name = "efs-sg"
