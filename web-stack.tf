@@ -1,4 +1,8 @@
 # Parameters
+
+# Todo map Ami to region using map variable.
+# https://www.terraform.io/docs/configuration/variables.html#maps
+
 variable "domain" {
   description = "The domain name for the site"
 }
