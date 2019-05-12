@@ -213,7 +213,7 @@ resource "aws_launch_template" "ec2_launch" {
 }
 
 data "template_file" "userdata" {
-  template = "${file("userdata.sh")}"
+  template = "${file("${path.module}/userdata.sh")}"
   vars = {
     domain = "${var.domain}"
     mount_point = "${aws_efs_mount_target.fs_mount.dns_name}"
