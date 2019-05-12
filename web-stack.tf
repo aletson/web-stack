@@ -233,7 +233,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "${lookup(${var.ami_id}, ${var.primaryregion})}"
+  image_id = "${lookup(var.ami_id, var.primaryregion)}"
   
   instance_type = "t3.micro"
   
