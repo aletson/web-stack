@@ -11,6 +11,21 @@ variable "primaryregion" {
   default = "us-east-1"
 }
 
+variable "ami_id" { # Ubuntu 18.04 LTS AMI
+  type = "map"
+  default = {
+    "us-west-2" = "ami-04ef7170e45541f07"
+    "us-east-1" = "ami-0273df992a343e0d6"
+    "us-east-2" = "ami-033a0960d9d83ead0"
+    "us-west-1" = "ami-057a852b5ed4b66bc"
+    "ca-central-1" = "	ami-044530525bc7eff8e" # Canada
+    "eu-west-1" = "ami-0ae0cb89fc578cd9c" # Ireland
+    "ap-east-1" = "ami-9ea0d8ef" # Asia-Pacific
+    "cn-north-1" = "ami-09dd6088c3e46151c" # China
+    "sa-east-1" = "ami-0d6e00211f2547822" # South America
+  }
+}
+
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "mysql_pass" {}
@@ -218,7 +233,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "ami-04ef7170e45541f07"
+  image_id = "${lookup(${var.ami_id}, ${var.primaryregion})}"
   
   instance_type = "t3.micro"
   
