@@ -100,47 +100,65 @@ resource "aws_security_group_rule" "egress_efs_to_ec2" {
 resource "aws_security_group" "ec2_lb_group" {
   name = "ec2-instance-sg"
   vpc_id = "${aws_vpc.vpc.id}"
-  ingress {
-    security_groups = ["${aws_security_group.alb_group.id}"]
-	from_port = 80
-	to_port = 80
-	protocol = "tcp"
-  }
-  egress {
-    security_groups = ["${aws_security_group.efs_security_group.id}"]
-    from_port = 0
-	to_port = 0
-	protocol = "-1"
-  }
-  egress {
-    security_groups = ["${aws_security_group.rds_security_group.id}"]
-    from_port = 0
-	to_port = 0
-	protocol = "-1"
-  }
+}
+
+resource "aws_security_group_rule" "ingress_alb_to_ec2" {
+  type = "ingress"
+  from_port = 80
+  to_port = 80
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.ec2_lb_group.id}"
+  source_security_group_id = "${aws_security_group.alb_group.id}"
+}
+
+resource "aws_security_group_rule" "egress_ec2_to_efs" {
+  type = "egress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  security_group_id = "${aws_security_group.ec2_lb_group.id}"
+  source_security_group_id = "${aws_security_group.efs_security_group.id}"
+}
+
+resource "aws_security_group_rule" "egress_ec2_to_rds" {
+  type = "egress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  security_group_id = "${aws_security_group.ec2_lb_group.id}"
+  source_security_group_id = "${aws_security_group.rds_security_group.id}"
 }
 
 resource "aws_security_group" "alb_group" {
   name = "ec2-alb-sg"
   vpc_id = "${aws_vpc.vpc.id}"
-  ingress {
-    cidr_blocks = ["0.0.0.0/0"]
-	from_port = 443
-	to_port = 443
-	protocol = "tcp"
-  }
-  ingress {
-    cidr_blocks = ["0.0.0.0/0"]
-	from_port = 80
-	to_port = 80
-	protocol = "tcp"
-  }
-  egress {
-    cidr_blocks = ["0.0.0.0/0"]
-    from_port = 0
-	to_port = 0
-	protocol = "-1"
-  }
+}
+
+resource "aws_security_group_rule" "ingress_https_to_alb" {
+  type = "ingress"
+  from_port = 443
+  to_port = 443
+  cidr_blocks = ["0.0.0.0/0"]
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.alb_group.id}"
+}
+
+resource "aws_security_group_rule" "ingress_http_to_alb" {
+  type = "ingress"
+  from_port = 80
+  to_port = 80
+  cidr_blocks = ["0.0.0.0/0"]
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.alb_group.id}"
+}
+
+resource "aws_security_group_rule" "egress_alb_to_all" {
+  type = "ingress"
+  from_port = 0
+  to_port = 0
+  cidr_blocks = ["0.0.0.0/0"]
+  protocol = "-1"
+  security_group_id = "${aws_security_group.alb_group.id}"
 }
 
 resource "aws_security_group" "rds_security_group" {
