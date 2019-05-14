@@ -15,7 +15,7 @@ variable "ami_id" { # Ubuntu 18.04 LTS AMI
     "us-east-1" = "ami-0273df992a343e0d6"
     "us-east-2" = "ami-033a0960d9d83ead0"
     "us-west-1" = "ami-057a852b5ed4b66bc"
-    "ca-central-1" = "	ami-044530525bc7eff8e" # Canada
+    "ca-central-1" = "ami-044530525bc7eff8e" # Canada
     "eu-west-1" = "ami-0ae0cb89fc578cd9c" # Ireland
     "ap-east-1" = "ami-9ea0d8ef" # Asia-Pacific
     "cn-north-1" = "ami-09dd6088c3e46151c" # China
