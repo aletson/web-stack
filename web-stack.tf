@@ -60,29 +60,44 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-resource "aws_subnet" "efs_subnet" {
+resource "aws_subnet" "efs_subnet_a" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 1)}" # 10.0.1.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}a"
 }
-
-resource "aws_subnet" "ec2_subnet_1a" {
+resource "aws_subnet" "efs_subnet_b" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 2)}" # 10.0.2.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}a"
 }
-resource "aws_subnet" "ec2_subnet_1b" {
+resource "aws_subnet" "efs_subnet_c" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 3)}" # 10.0.3.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}a"
+}
+resource "aws_subnet" "efs_subnet_d" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 4)}" # 10.0.4.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}a"
+}
+
+resource "aws_subnet" "ec2_subnet_a" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 5)}" # 10.0.5.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}a"
+}
+resource "aws_subnet" "ec2_subnet_b" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 6)}" # 10.0.6.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}b"
 }
-resource "aws_subnet" "ec2_subnet_1c" {
-  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 4)}" # 10.0.4.0/24
+resource "aws_subnet" "ec2_subnet_c" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 7)}" # 10.0.7.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}c"
 }
 resource "aws_subnet" "rds_subnet" {
-  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 5)}" # 10.0.5.0/24
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 8)}" # 10.0.8.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}d"
 }
@@ -202,10 +217,28 @@ resource "aws_efs_file_system" "fs" {
   }
 }
 
-resource "aws_efs_mount_target" "fs_mount" {
+resource "aws_efs_mount_target" "fs_mount_a" {
   file_system_id = "${aws_efs_file_system.fs.id}"
-  subnet_id = "${aws_subnet.efs_subnet.id}"
-  security_groups = ["${aws_security_group.ec2_lb_group.id}"]
+  subnet_id = "${aws_subnet.efs_subnet_a.id}"
+  security_groups = ["${aws_security_group.efs_security_group.id}"]
+}
+
+resource "aws_efs_mount_target" "fs_mount_b" {
+  file_system_id = "${aws_efs_file_system.fs.id}"
+  subnet_id = "${aws_subnet.efs_subnet_b.id}"
+  security_groups = ["${aws_security_group.efs_security_group.id}"]
+}
+
+resource "aws_efs_mount_target" "fs_mount_c" {
+  file_system_id = "${aws_efs_file_system.fs.id}"
+  subnet_id = "${aws_subnet.efs_subnet_c.id}"
+  security_groups = ["${aws_security_group.efs_security_group.id}"]
+}
+
+resource "aws_efs_mount_target" "fs_mount_d" {
+  file_system_id = "${aws_efs_file_system.fs.id}"
+  subnet_id = "${aws_subnet.efs_subnet_d.id}"
+  security_groups = ["${aws_security_group.efs_security_group.id}"]
 }
 
 resource "aws_launch_template" "ec2_launch" {
@@ -246,7 +279,7 @@ data "template_file" "userdata" {
   template = "${file("${path.module}/userdata.sh")}"
   vars = {
     domain = "${var.domain}"
-    mount_point = "${aws_efs_mount_target.fs_mount.dns_name}"
+    mount_point = "${aws_efs_file_system.fs.dns_name}"
   }
 }
 

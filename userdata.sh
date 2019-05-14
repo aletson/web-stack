@@ -1,17 +1,14 @@
 #!/bin/bash
-sudo add-apt-repository ppa:ondrej/php
-sudo apt-get update
-sudo apt-get install -y php7.0* nginx nfs-common
-sudo mkdir -p /mnt/efs
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${mount_point}:/ /mnt/efs
+add-apt-repository ppa:ondrej/php
+apt-get update && apt-get upgrade
+apt-get install -y php7.0* nginx nfs-common
+mkdir -p /mnt/efs
+mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${mount_point}:/ /mnt/efs
 echo "${mount_point}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,nofail 0 0" | sudo tee -a /etc/fstab
+mkdir -p /etc/nginx/sites-available
+mkdir -p /etc/nginx/sites-enabled
 
-
-# config php 
-
-# config nginx vhost
-
-sudo cat << EOF_VHOST > /etc/nginx/sites-available/${domain}.conf
+cat << EOF_VHOST > /etc/nginx/sites-available/${domain}.conf
 server {
   listen 80;
   server_name ${domain} www.${domain};
@@ -45,7 +42,7 @@ server {
 
 EOF_VHOST
 
-sudo cat << EOF_PARAMS > /etc/nginx/fastcgi_params
+cat << EOF_PARAMS > /etc/nginx/fastcgi_params
 fastcgi_param  QUERY_STRING       $query_string;
 fastcgi_param  REQUEST_METHOD     $request_method;
 fastcgi_param  CONTENT_TYPE       $content_type;
@@ -72,9 +69,9 @@ fastcgi_param  SERVER_NAME        $server_name;
 fastcgi_param  REDIRECT_STATUS    200;
 
 EOF_PARAMS
-sudo ln -s /etc/nginx/sites-available/${domain}.conf /etc/nginx/sites-enabled/${domain}.conf
+ln -s /etc/nginx/sites-available/${domain}.conf /etc/nginx/sites-enabled/${domain}.conf
 
-sudo cat <<EOF_NGINX > /etc/nginx/nginx.conf
+cat <<EOF_NGINX > /etc/nginx/nginx.conf
 user www-data;
 worker_processes auto;
 pid /run/nginx.pid;
@@ -107,9 +104,6 @@ http {
 }
 EOF_NGINX
 
-sudo systemctl start nginx
-sudo systemctl enable nginx
-
 sudo cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
@@ -135,5 +129,10 @@ if [ -d "/mnt/efs/html" ]; then
 fi
 
 sudo sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
+
 sudo systemctl start php7.0-fpm
 sudo systemctl enable php7.0-fpm
+sudo systemctl enable amazon-ssm-agent.service
+sudo systemctl start amazon-ssm-agent.service
+systemctl start nginx
+systemctl enable nginx
