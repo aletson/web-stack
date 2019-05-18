@@ -301,5 +301,5 @@ sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
 sudo systemctl enable amazon-ssm-agent.service
 sudo systemctl start amazon-ssm-agent.service
-systemctl start nginx
-systemctl enable nginx
+systemctl start httpd
+systemctl enable httpd
