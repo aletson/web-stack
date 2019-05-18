@@ -3,7 +3,7 @@ yum install epel-release -y
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 rpm -Uvh https://centos7.iuscommunity.org/ius-release.rpm
 yum install deltarpm -y -q
-yum install -y php70w* httpd24u openssl httpd24u-tools httpd24u-devel mod24u_ssl policycoreutils-python ntpdate nfs-utils
+yum install -y php70w* httpd24u httpd24u-tools httpd24u-devel policycoreutils-python ntpdate nfs-utils
 ntpdate pool.ntp.org
 systemctl enable ntpdate
 systemctl start ntpdate
@@ -182,49 +182,6 @@ echo "<IfModule mod_headers.c>" >> /etc/httpd/conf.modules.d/03-deflate.conf
 echo "Header append Vary User-Agent" >> /etc/httpd/conf.modules.d/03-deflate.conf
 echo "</IfModule>" >> /etc/httpd/conf.modules.d/03-deflate.conf
 
-cat << EOF_SSL > /etc/httpd/conf.d/ssl.conf
-Listen 443 https
-SSLPassPhraseDialog exec:/usr/libexec/httpd-ssl-pass-dialog
-SSLSessionCache         shmcb:/run/httpd/sslcache(512000)
-SSLSessionCacheTimeout  300
-SSLRandomSeed startup file:/dev/urandom  256
-SSLRandomSeed connect builtin
-SSLCryptoDevice builtin
-SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
-SSLProtocol All -SSLv2 -SSLv3
-SSLHonorCipherOrder On
-#Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains; preload"
-#Header always set X-Frame-Options DENY
-Header always set X-Content-Type-Options nosniff
-SSLCompression off 
-SSLSessionTickets Off
-SSLUseStapling on 
-SSLStaplingCache "shmcb:logs/stapling-cache(150000)" 
-SSLStaplingResponderTimeout 30
-<VirtualHost _default_:443>
-ErrorLog logs/ssl_error_log
-TransferLog logs/ssl_access_log
-LogLevel warn
-SSLEngine on
-SSLProtocol all -SSLv2
-SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
-SSLCertificateFile /etc/pki/tls/certs/localhost.crt
-SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
-<Files ~ "\.(cgi|shtml|phtml|php3?)$">
-    SSLOptions +StdEnvVars
-</Files>
-<Directory "/var/www/cgi-bin">
-    SSLOptions +StdEnvVars
-</Directory>
-BrowserMatch "MSIE [2-5]" \
-         nokeepalive ssl-unclean-shutdown \
-         downgrade-1.0 force-response-1.0
-
-CustomLog logs/ssl_request_log \
-          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
-</VirtualHost>
-
-EOF_SSL
 echo "" > /etc/httpd/conf.d/welcome.conf
 cat << EOF_AUTOINDEX > /etc/httpd/conf.d/autoindex.conf
 IndexOptions FancyIndexing HTMLTable VersionSort
