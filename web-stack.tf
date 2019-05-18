@@ -9,7 +9,7 @@ variable "primaryregion" {
 }
 
 variable "os_type" {
-  default = "ubuntu-nginx" # it's either this or centos-apache, once i write centos-apache
+  default = "ubuntu-nginx" # allowable values: ubuntu-nginx, centos-apache
 }
 
 variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
