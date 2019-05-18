@@ -262,8 +262,12 @@ ReadmeName README.html
 HeaderName HEADER.html
 IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
 EOF_AUTOINDEX
+echo "" > /etc/httpd/conf.d/php.conf
+sed -i 's/LoadModule mpm_prefork_module/#LoadModule mpm_prefork_module/' /etc/httpd/conf.modules.d/00-mpm.conf
+sed -i 's/#LoadModule mpm_event_module/LoadModule mpm_event_module/' /etc/httpd/conf.modules.d/00-mpm.conf
 
-sudo cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
+
+sudo cat <<EOF_POOL > /etc/php-fpm.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
 listen.allowed_clients = 127.0.0.1
@@ -282,11 +286,30 @@ php_admin_value[open_basedir] = /var/www/html/${domain}:/usr/share/php:/tmp:/usr
 php_admin_value[session.save_path] = /var/www/html/${domain}/tmp
 php_admin_value[upload_tmp_dir] = /var/www/html/${domain}/tmp
 EOF_POOL
+cat << EOF_FPM > /etc/php-fpm.conf
+include=/etc/php-fpm.d/*.conf
+[global]
+pid = /run/php-fpm/php-fpm.pid
+error_log = syslog
+syslog.facility = local1
+syslog.ident = php-fpm
+emergency_restart_threshold = 5
+emergency_restart_interval = 1m
+process_control_timeout = 5s
+daemonize = no
+EOF_FPM
 
 if [ -d "/mnt/efs/html" ]; then
   sudo chown apache:apache /mnt/efs/html -R
 fi
 
+echo "* soft nofile 65536" >> /etc/security/limits.conf
+echo "* hard nofile 65536" >> /etc/security/limits.conf
+echo "fs.file-max = 4000000" >> /etc/sysctl.conf
+echo "ulimit -n 65536" >> /etc/sysconfig/httpd
+
+
+setsebool -P httpd_enable_cgi 1
 setsebool -P httpd_can_network_connect 1
 setsebool -P httpd_can_network_connect_db 1
 setsebool -P httpd_unified 1
