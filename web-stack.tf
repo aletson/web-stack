@@ -8,7 +8,11 @@ variable "primaryregion" {
   default = "us-east-1"
 }
 
-variable "ami_id" { # Ubuntu 18.04 LTS AMI
+variable "os_type" {
+  default = "ubuntu-nginx" # it's either this or centos-apache, once i write centos-apache
+}
+
+variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
   type = "map"
   default = {
     "us-west-2" = "ami-04ef7170e45541f07"
@@ -22,6 +26,21 @@ variable "ami_id" { # Ubuntu 18.04 LTS AMI
     "sa-east-1" = "ami-0d6e00211f2547822" # South America
   }
 }
+
+variable "centos_ami_id" {
+  type = "map"
+  default = {
+    "us-west-2" = "ami-a042f4d8"
+    "us-east-1" = "ami-4bf3d731"
+    "us-east-2" = "ami-e1496384"
+    "us-west-1" = "ami-65e0e305"
+    "ca-central-1" = "ami-dcad28b8" # Canada
+    "eu-west-1" = "ami-6e28b517" # Ireland
+    "ap-south-1" = "ami-3d9ec952" # Asia-Pacific
+    "sa-east-1" = "ami-f9adef95" # South America
+  }
+}
+# Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
 
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
@@ -263,7 +282,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "${lookup(var.ami_id, var.primaryregion)}"
+  image_id = "${lookup(var.os_type == "ubuntu-nginx" ? var.ubuntu_ami_id : var.centos_ami_id, var.primaryregion)}"
   
   instance_type = "t3.micro"
   
@@ -276,7 +295,7 @@ resource "aws_launch_template" "ec2_launch" {
 }
 
 data "template_file" "userdata" {
-  template = "${file("${path.module}/userdata.sh")}"
+  template = "${file("${path.module}/${var.ostype == "ubuntu-nginx" ? "ubuntu" : "centos" }-userdata.sh")}"
   vars = {
     domain = "${var.domain}"
     mount_point = "${aws_efs_file_system.fs.dns_name}"
