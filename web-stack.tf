@@ -295,7 +295,7 @@ resource "aws_launch_template" "ec2_launch" {
 }
 
 data "template_file" "userdata" {
-  template = "${file("${path.module}/${var.ostype == "ubuntu-nginx" ? "ubuntu" : "centos" }-userdata.sh")}"
+  template = "${file("${path.module}/${var.os_type == "ubuntu-nginx" ? "ubuntu" : "centos" }-userdata.sh")}"
   vars = {
     domain = "${var.domain}"
     mount_point = "${aws_efs_file_system.fs.dns_name}"
@@ -351,7 +351,7 @@ resource "aws_lb_target_group" "ec2_tg" {
 
 
 resource "aws_autoscaling_group" "autoscale" {
-  vpc_zone_identifier = ["${aws_subnet.ec2_subnet_1a.id}", "${aws_subnet.ec2_subnet_1b.id}", "${aws_subnet.ec2_subnet_1c.id}"]
+  vpc_zone_identifier = ["${aws_subnet.ec2_subnet_a.id}", "${aws_subnet.ec2_subnet_b.id}", "${aws_subnet.ec2_subnet_c.id}"]
   launch_template {
     id = "${aws_launch_template.ec2_launch.id}"
   }
