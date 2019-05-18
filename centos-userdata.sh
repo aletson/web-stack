@@ -9,8 +9,8 @@ systemctl enable ntpdate
 systemctl start ntpdate
 yum update -y
 mkdir -p /mnt/efs
-mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${mount_point}:/ /mnt/efs
-echo "${mount_point}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,nofail 0 0" | sudo tee -a /etc/fstab
+mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,acl,fsc ${mount_point}:/ /mnt/efs
+echo "${mount_point}:/ /mnt/efs nfs4 _netdev,auto,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,acl,fsc 0 0" | sudo tee -a /etc/fstab
 mkdir -p /etc/httpd/sites-available
 mkdir -p /etc/httpd/sites-enabled
 
