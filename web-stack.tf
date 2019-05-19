@@ -115,10 +115,16 @@ resource "aws_subnet" "ec2_subnet_c" {
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}c"
 }
-resource "aws_subnet" "rds_subnet" {
+resource "aws_subnet" "rds_subnet_d" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 8)}" # 10.0.8.0/24
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}d"
+}
+
+resource "aws_subnet" "rds_subnet_c" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 9)}" # 10.0.9.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}c"
 }
 resource "aws_security_group" "efs_security_group" {
   name = "efs-sg"
@@ -390,7 +396,7 @@ resource "aws_acm_certificate_validation" "cert" {
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  subnet_ids = ["${aws_subnet.rds_subnet.id}"]
+  subnet_ids = ["${aws_subnet.rds_subnet_c.id}", "${aws_subnet.rds_subnet_d.id}"]
 }
 
 resource "aws_db_instance" "rds" {
