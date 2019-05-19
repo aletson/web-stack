@@ -236,27 +236,9 @@ resource "aws_efs_file_system" "fs" {
   }
 }
 
-resource "aws_efs_mount_target" "fs_mount_a" {
+resource "aws_efs_mount_target" "fs_mount" {
   file_system_id = "${aws_efs_file_system.fs.id}"
   subnet_id = "${aws_subnet.efs_subnet_a.id}"
-  security_groups = ["${aws_security_group.efs_security_group.id}"]
-}
-
-resource "aws_efs_mount_target" "fs_mount_b" {
-  file_system_id = "${aws_efs_file_system.fs.id}"
-  subnet_id = "${aws_subnet.efs_subnet_b.id}"
-  security_groups = ["${aws_security_group.efs_security_group.id}"]
-}
-
-resource "aws_efs_mount_target" "fs_mount_c" {
-  file_system_id = "${aws_efs_file_system.fs.id}"
-  subnet_id = "${aws_subnet.efs_subnet_c.id}"
-  security_groups = ["${aws_security_group.efs_security_group.id}"]
-}
-
-resource "aws_efs_mount_target" "fs_mount_d" {
-  file_system_id = "${aws_efs_file_system.fs.id}"
-  subnet_id = "${aws_subnet.efs_subnet_d.id}"
   security_groups = ["${aws_security_group.efs_security_group.id}"]
 }
 
@@ -282,7 +264,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "${lookup(var.os_type == "ubuntu-nginx" ? var.ubuntu_ami_id : var.centos_ami_id, var.primaryregion)}"
+  image_id = "${var.os_type == "ubuntu-nginx" ? lookup(var.ubuntu_ami_id, var.primaryregion) : lookup(var.centos_ami_id, var.primaryregion)}"
   
   instance_type = "t3.micro"
   
