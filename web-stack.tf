@@ -293,6 +293,7 @@ data "template_file" "userdata" {
 resource "aws_lb" "alb" {
   name = "alb"
   internal = false
+  subnets = ["${aws_subnet.ec2_subnet_a.id}", "${aws_subnet.ec2_subnet_b.id}", "${aws_subnet.ec2_subnet_c.id}"]
   security_groups = ["${aws_security_group.alb_group.id}"]
 }
 
