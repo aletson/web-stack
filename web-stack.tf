@@ -79,6 +79,10 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+resource "aws_internet_gateway" "gw" {
+  vpc_id = "${aws_vpc.vpc.id}"
+}
+
 resource "aws_subnet" "efs_subnet_a" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 1)}" # 10.0.1.0/24
   vpc_id = "${aws_vpc.vpc.id}"
