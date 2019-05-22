@@ -42,6 +42,7 @@ variable "centos_ami_id" {
 }
 # Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
 
+variable "ssh_public_key" {} # public key "ssh-rsa ..... keyname"
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "mysql_pass" {}
@@ -54,7 +55,7 @@ provider "aws" {
 
 resource "aws_key_pair" "keypair" {
   key_name = "ssh-keypair"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCRUK0A4dLC2Ww0He1IbUPCn4AmwautKvSoM7gCB1uyAJ4sROHlxrbIceeQie3TNYAtCywARZcItqwY0UDmPSX8cxEio94qkZ9n083VrOWeTxfy7Budy03cJIL0G2TDa1E9r1Dr4HVq5akLZy6DtMSjUbUxLp8eJhnBHamRcjG9PMIcFZaW4qV/2Re9Wct6jLvkSsKi71U8NFd1ZzzbkakRz90CuBTazQS170F0KBzb5fTNgadAb7kegKmYbGkLVdz6HmGnggujx5g+QIofX7Mh2poz1RiItqlq1F7ALpJygvydElhf0dJHjEvaQeyBo16eOOLQRziUp3Fair1FOJwL aletson-personal"
+  public_key = "${var.ssh_public_key}"
 }
 
 # Resources for Terraform to build out
