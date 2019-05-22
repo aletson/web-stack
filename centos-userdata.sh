@@ -19,8 +19,8 @@ cat << EOF_VHOST > /etc/httpd/sites-available/${domain}.conf
         ServerAdmin devops@vogdigital.com
         DocumentRoot /mnt/efs/html
         DirectoryIndex index.php index.html
-		SetEnv DB_ENDPOINT ${database}
-		SetEnv REDIS_ENDPOINT ${redis}
+        SetEnv DB_ENDPOINT ${database}
+        SetEnv REDIS_ENDPOINT ${redis}
         ServerName ${domain}
         ServerAlias www.${domain}
         <FilesMatch \.php$>
