@@ -2,6 +2,7 @@
 yum install epel-release -y
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 rpm -Uvh https://centos7.iuscommunity.org/ius-release.rpm
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 yum install deltarpm -y -q
 yum install -y php70w* httpd24u httpd24u-tools httpd24u-devel policycoreutils-python ntpdate nfs-utils
 ntpdate pool.ntp.org
@@ -288,7 +289,7 @@ setsebool -P httpd_graceful_shutdown 1
 
 sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
-sudo systemctl enable amazon-ssm-agent.service
-sudo systemctl start amazon-ssm-agent.service
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
 systemctl start httpd
 systemctl enable httpd
