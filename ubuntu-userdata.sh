@@ -122,6 +122,9 @@ pm.process_idle_timeout=10s
 php_admin_value[open_basedir] = /var/www/html/${domain}:/usr/share/php:/tmp:/usr/share/phpmyadmin:/etc/phpmyadmin:/var/lib/phpmyadmin
 php_admin_value[session.save_path] = /var/www/html/${domain}/tmp
 php_admin_value[upload_tmp_dir] = /var/www/html/${domain}/tmp
+clear_env = no
+env[DB_ENDPOINT] = "${database}"
+env[REDIS_ENDPOINT] = "${redis}"
 EOF_POOL
 
 if [ -d "/mnt/efs/html" ]; then
