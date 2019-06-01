@@ -42,6 +42,7 @@ variable "centos_ami_id" {
 }
 # Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
 
+variable "ssh_public_key" {} # public key "ssh-rsa ..... keyname"
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "mysql_pass" {}
@@ -54,7 +55,7 @@ provider "aws" {
 
 resource "aws_key_pair" "keypair" {
   key_name = "ssh-keypair"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCRUK0A4dLC2Ww0He1IbUPCn4AmwautKvSoM7gCB1uyAJ4sROHlxrbIceeQie3TNYAtCywARZcItqwY0UDmPSX8cxEio94qkZ9n083VrOWeTxfy7Budy03cJIL0G2TDa1E9r1Dr4HVq5akLZy6DtMSjUbUxLp8eJhnBHamRcjG9PMIcFZaW4qV/2Re9Wct6jLvkSsKi71U8NFd1ZzzbkakRz90CuBTazQS170F0KBzb5fTNgadAb7kegKmYbGkLVdz6HmGnggujx5g+QIofX7Mh2poz1RiItqlq1F7ALpJygvydElhf0dJHjEvaQeyBo16eOOLQRziUp3Fair1FOJwL aletson-personal"
+  public_key = "${var.ssh_public_key}"
 }
 
 # Resources for Terraform to build out
@@ -130,6 +131,19 @@ resource "aws_subnet" "rds_subnet_c" {
   vpc_id = "${aws_vpc.vpc.id}"
   availability_zone = "${var.primaryregion}c"
 }
+
+resource "aws_subnet" "eca_subnet_a" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 10)}" # 10.0.10.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}a"
+}
+
+resource "aws_subnet" "eca_subnet_b" {
+  cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 11)}" # 10.0.11.0/24
+  vpc_id = "${aws_vpc.vpc.id}"
+  availability_zone = "${var.primaryregion}b"
+}
+
 resource "aws_security_group" "efs_security_group" {
   name = "efs-sg"
   vpc_id = "${aws_vpc.vpc.id}"
@@ -183,6 +197,40 @@ resource "aws_security_group_rule" "egress_ec2_to_rds" {
   protocol = "-1"
   security_group_id = "${aws_security_group.ec2_lb_group.id}"
   source_security_group_id = "${aws_security_group.rds_security_group.id}"
+}
+
+resource "aws_security_group_rule" "egress_ec2_to_elasticache" {
+  type = "egress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  security_group_id = "${aws_security_group.ec2_lb_group.id}"
+  source_security_group_id = "${aws_security_group.eca_grp.id}"
+}
+
+
+
+resource "aws_security_group" "eca_grp" {
+  name = "elasticache-sg"
+  vpc_id = "${aws_vpc.vpc.id}"
+}
+
+resource "aws_security_group_rule" "ingress_ec2_to_elasticache" {
+  type = "ingress"
+  from_port = 6379
+  to_port = 6379
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.eca_grp.id}"
+  source_security_group_id = "${aws_security_group.ec2_lb_group.id}"
+}
+
+resource "aws_security_group_rule" "egress_elasticache_to_ec2" {
+  type = "ingress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  security_group_id = "${aws_security_group.eca_grp.id}"
+  source_security_group_id = "${aws_security_group.ec2_lb_group.id}"
 }
 
 resource "aws_security_group" "alb_group" {
@@ -291,6 +339,8 @@ data "template_file" "userdata" {
   vars = {
     domain = "${var.domain}"
     mount_point = "${aws_efs_file_system.fs.dns_name}"
+	redis = "${aws_elasticache_cluster.eca_cluster.cache_nodes.0.address}"
+	database = "${aws_db_instance.rds.endpoint}"
   }
 }
 
@@ -415,4 +465,21 @@ resource "aws_db_instance" "rds" {
   password = "${var.mysql_pass}"
   vpc_security_group_ids = ["${aws_security_group.rds_security_group.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.rds_subnet_group.name}"
+}
+
+resource "aws_elasticache_cluster" "eca_cluster" {
+  cluster_id = "eca-cluster"
+  engine = "redis"
+  node_type = "cache.t2.micro"
+  num_cache_nodes = 1
+  parameter_group_name = "default.redis5.0"
+  engine_version = "5.0.4"
+  port = 6379
+  security_group_ids = ["${aws_security_group.eca_grp.id}"]
+  subnet_group_name = "${aws_elasticache_subnet_group.eca_subgrp.name}"
+}
+  
+resource "aws_elasticache_subnet_group" "eca_subgrp" {
+  name = "eca-subnetgroup"
+  subnet_ids = ["${aws_subnet.eca_subnet_a.id}", "${aws_subnet.eca_subnet_b.id}"]
 }

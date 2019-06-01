@@ -2,6 +2,7 @@
 yum install epel-release -y
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 rpm -Uvh https://centos7.iuscommunity.org/ius-release.rpm
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 yum install deltarpm -y -q
 yum install -y php70w* httpd24u httpd24u-tools httpd24u-devel policycoreutils-python ntpdate nfs-utils
 ntpdate pool.ntp.org
@@ -19,6 +20,8 @@ cat << EOF_VHOST > /etc/httpd/sites-available/${domain}.conf
         ServerAdmin devops@vogdigital.com
         DocumentRoot /mnt/efs/html
         DirectoryIndex index.php index.html
+        SetEnv DB_ENDPOINT ${database}
+        SetEnv REDIS_ENDPOINT ${redis}
         ServerName ${domain}
         ServerAlias www.${domain}
         <FilesMatch \.php$>
@@ -157,32 +160,38 @@ CustomLog /var/log/httpd/multiple_vhost_log vhost
 IncludeOptional sites-enabled/*.conf
 EOF_HTTPD
 
-echo "<IfModule mod_expires.c>" > /etc/httpd/conf.modules.d/02-expires.conf
-echo "ExpiresActive On" >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType image/jpg "access plus 1 year"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType image/jpeg "access plus 1 year"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType image/gif "access plus 1 year"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType image/png "access plus 1 year"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType text/css "access plus 1 month"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType application/pdf "access plus 1 month"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType text/x-javascript "access plus 1 month"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType application/javascript "access plus 1 month"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType application/x-shockwave-flash "access plus 1 month"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresByType image/x-icon "access plus 1 year"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo 'ExpiresDefault "access plus 2 days"' >> /etc/httpd/conf.modules.d/02-expires.conf
-echo "</IfModule>" >> /etc/httpd/conf.modules.d/02-expires.conf
-echo "Header unset ETag" >> /etc/httpd/conf.modules.d/02-expires.conf
-echo "FileETag None" >> /etc/httpd/conf.modules.d/02-expires.conf
-echo "<IfModule mod_deflate.c>" > /etc/httpd/conf.modules.d/03-deflate.conf
-echo "SetOutputFilter DEFLATE" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "SetEnvIfNoCase Request_URI \.(?:exe|t?gz|zip|bz2|sit|rar)$ no-gzip dont-vary" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "</IfModule>" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "<IfModule mod_headers.c>" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "Header append Vary User-Agent" >> /etc/httpd/conf.modules.d/03-deflate.conf
-echo "</IfModule>" >> /etc/httpd/conf.modules.d/03-deflate.conf
+cat << EOF_EXPIRES > /etc/httpd/conf.modules.d/02-expires.conf
+<IfModule mod_expires.c>
+ExpiresActive On" >> /etc/httpd/conf.modules.d/02-expires.conf
+ExpiresByType image/jpg "access plus 1 year"
+ExpiresByType image/jpeg "access plus 1 year"
+ExpiresByType image/gif "access plus 1 year"
+ExpiresByType image/png "access plus 1 year"
+ExpiresByType text/css "access plus 1 month"
+ExpiresByType application/pdf "access plus 1 month"
+ExpiresByType text/x-javascript "access plus 1 month"
+ExpiresByType application/javascript "access plus 1 month"
+ExpiresByType application/x-shockwave-flash "access plus 1 month"
+ExpiresByType image/x-icon "access plus 1 year"
+ExpiresDefault "access plus 2 days"
+</IfModule>
+Header unset ETag
+FileETag None
+EOF_EXPIRES
+
+cat << EOF_DEFLATE > /etc/httpd/conf.modules.d/03-deflate.conf
+<IfModule mod_deflate.c>
+SetOutputFilter DEFLATE
+SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary
+SetEnvIfNoCase Request_URI \.(?:exe|t?gz|zip|bz2|sit|rar)$ no-gzip dont-vary
+</IfModule>
+<IfModule mod_headers.c>
+Header append Vary User-Agent
+</IfModule>
+EOF_DEFLATE
 
 echo "" > /etc/httpd/conf.d/welcome.conf
+
 cat << EOF_AUTOINDEX > /etc/httpd/conf.d/autoindex.conf
 IndexOptions FancyIndexing HTMLTable VersionSort
 AddIconByEncoding (CMP,/icons/compressed.gif) x-compress x-gzip
@@ -219,10 +228,11 @@ ReadmeName README.html
 HeaderName HEADER.html
 IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
 EOF_AUTOINDEX
+
 echo "" > /etc/httpd/conf.d/php.conf
+
 sed -i 's/LoadModule mpm_prefork_module/#LoadModule mpm_prefork_module/' /etc/httpd/conf.modules.d/00-mpm.conf
 sed -i 's/#LoadModule mpm_event_module/LoadModule mpm_event_module/' /etc/httpd/conf.modules.d/00-mpm.conf
-
 
 sudo cat <<EOF_POOL > /etc/php-fpm.d/${domain}.conf
 [${domain}]
@@ -279,7 +289,7 @@ setsebool -P httpd_graceful_shutdown 1
 
 sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
-sudo systemctl enable amazon-ssm-agent.service
-sudo systemctl start amazon-ssm-agent.service
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
 systemctl start httpd
 systemctl enable httpd
