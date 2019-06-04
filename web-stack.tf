@@ -181,31 +181,13 @@ resource "aws_security_group_rule" "ingress_alb_to_ec2" {
   source_security_group_id = "${aws_security_group.alb_group.id}"
 }
 
-resource "aws_security_group_rule" "egress_ec2_to_efs" {
+resource "aws_security_group_rule" "egress_ec2_to_all" {
   type = "egress"
   from_port = 0
   to_port = 0
+  cidr_blocks = ["0.0.0.0/0"]
   protocol = "-1"
   security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.efs_security_group.id}"
-}
-
-resource "aws_security_group_rule" "egress_ec2_to_rds" {
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.rds_security_group.id}"
-}
-
-resource "aws_security_group_rule" "egress_ec2_to_elasticache" {
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.eca_grp.id}"
 }
 
 
@@ -225,7 +207,7 @@ resource "aws_security_group_rule" "ingress_ec2_to_elasticache" {
 }
 
 resource "aws_security_group_rule" "egress_elasticache_to_ec2" {
-  type = "ingress"
+  type = "egress"
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -316,6 +298,10 @@ resource "aws_launch_template" "ec2_launch" {
   
   credit_specification {
     cpu_credits = "standard"
+  }
+
+  network_interfaces {
+    associate_public_ip_address = true
   }
   
   disable_api_termination = false
