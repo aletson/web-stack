@@ -299,6 +299,10 @@ resource "aws_launch_template" "ec2_launch" {
   credit_specification {
     cpu_credits = "standard"
   }
+
+  network_interfaces {
+    associate_public_ip_address = true
+  }
   
   disable_api_termination = false
   
