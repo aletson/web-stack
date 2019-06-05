@@ -108,21 +108,25 @@ resource "aws_subnet" "efs_subnet_d" {
 resource "aws_subnet" "ec2_subnet_a" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 5)}" # 10.0.5.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch  = true
   availability_zone = "${var.primaryregion}a"
 }
 resource "aws_subnet" "ec2_subnet_b" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 6)}" # 10.0.6.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch  = true
   availability_zone = "${var.primaryregion}b"
 }
 resource "aws_subnet" "ec2_subnet_c" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 7)}" # 10.0.7.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch  = true
   availability_zone = "${var.primaryregion}c"
 }
 resource "aws_subnet" "rds_subnet_d" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 8)}" # 10.0.8.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch  = true
   availability_zone = "${var.primaryregion}d"
 }
 
@@ -303,6 +307,8 @@ resource "aws_launch_template" "ec2_launch" {
   network_interfaces {
     associate_public_ip_address = true
   }
+
+  instance_initiated_shutdown_behavior = "terminate"
   
   disable_api_termination = false
   
