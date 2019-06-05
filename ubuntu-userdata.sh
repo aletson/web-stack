@@ -104,6 +104,8 @@ http {
 }
 EOF_NGINX
 
+rm /etc/nginx/sites-enabled/default -f
+
 cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
