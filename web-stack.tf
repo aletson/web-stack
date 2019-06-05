@@ -85,17 +85,14 @@ resource "aws_internet_gateway" "gw" {
 }
 
 
-resource "aws_route_table" "r" {
-  vpc_id = "${aws_vpc.vpc.id}"
+resource "aws_default_route_table" "r" {
+  default_route_table = "${aws_vpc.vpc.default_route_table_id}"
 
   route {
-    ipv6_cidr_block        = "0.0.0.0/0"
+    cidr_block = "0.0.0.0/0"
     gateway_id = "${aws_internet_gateway.gw.id}"
   }
-
-  tags = {
-    Name = "main"
-  }
+  
 }
 
 resource "aws_subnet" "efs_subnet_a" {
