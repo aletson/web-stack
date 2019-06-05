@@ -92,17 +92,17 @@ resource "aws_subnet" "efs_subnet_a" {
 resource "aws_subnet" "efs_subnet_b" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 2)}" # 10.0.2.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "${var.primaryregion}a"
+  availability_zone = "${var.primaryregion}b"
 }
 resource "aws_subnet" "efs_subnet_c" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 3)}" # 10.0.3.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "${var.primaryregion}a"
+  availability_zone = "${var.primaryregion}c"
 }
 resource "aws_subnet" "efs_subnet_d" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 4)}" # 10.0.4.0/24
   vpc_id = "${aws_vpc.vpc.id}"
-  availability_zone = "${var.primaryregion}a"
+  availability_zone = "${var.primaryregion}d"
 }
 
 resource "aws_subnet" "ec2_subnet_a" {
