@@ -71,6 +71,7 @@ resource "aws_acm_certificate" "cert" {
   
 }
 
+
 resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -82,6 +83,15 @@ resource "aws_vpc" "vpc" {
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = "${aws_vpc.vpc.id}"
+}
+
+resource "aws_default_route_table" "r" {
+  default_route_table_id = "${aws_vpc.vpc.default_route_table_id}"
+  
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gw.id}"
+  }
 }
 
 resource "aws_subnet" "efs_subnet_a" {
@@ -108,16 +118,19 @@ resource "aws_subnet" "efs_subnet_d" {
 resource "aws_subnet" "ec2_subnet_a" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 5)}" # 10.0.5.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch = true
   availability_zone = "${var.primaryregion}a"
 }
 resource "aws_subnet" "ec2_subnet_b" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 6)}" # 10.0.6.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch = true
   availability_zone = "${var.primaryregion}b"
 }
 resource "aws_subnet" "ec2_subnet_c" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, 7)}" # 10.0.7.0/24
   vpc_id = "${aws_vpc.vpc.id}"
+  map_public_ip_on_launch = true
   availability_zone = "${var.primaryregion}c"
 }
 resource "aws_subnet" "rds_subnet_d" {
@@ -181,31 +194,13 @@ resource "aws_security_group_rule" "ingress_alb_to_ec2" {
   source_security_group_id = "${aws_security_group.alb_group.id}"
 }
 
-resource "aws_security_group_rule" "egress_ec2_to_efs" {
+resource "aws_security_group_rule" "egress_ec2_to_all" {
   type = "egress"
   from_port = 0
   to_port = 0
   protocol = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
   security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.efs_security_group.id}"
-}
-
-resource "aws_security_group_rule" "egress_ec2_to_rds" {
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.rds_security_group.id}"
-}
-
-resource "aws_security_group_rule" "egress_ec2_to_elasticache" {
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  security_group_id = "${aws_security_group.ec2_lb_group.id}"
-  source_security_group_id = "${aws_security_group.eca_grp.id}"
 }
 
 
@@ -225,7 +220,7 @@ resource "aws_security_group_rule" "ingress_ec2_to_elasticache" {
 }
 
 resource "aws_security_group_rule" "egress_elasticache_to_ec2" {
-  type = "ingress"
+  type = "egress"
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -257,7 +252,7 @@ resource "aws_security_group_rule" "ingress_http_to_alb" {
 }
 
 resource "aws_security_group_rule" "egress_alb_to_all" {
-  type = "ingress"
+  type = "egress"
   from_port = 0
   to_port = 0
   cidr_blocks = ["0.0.0.0/0"]
@@ -318,6 +313,132 @@ resource "aws_efs_mount_target" "fs_mount_d" {
   security_groups = ["${aws_security_group.efs_security_group.id}"]
 }
 
+resource "aws_iam_role" "ec2_iam" {
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+	"Statement": [
+		{
+	  	"Action": "sts:AssumeRole",
+			"Principal": {
+			"Service": "ec2.amazonaws.com"
+		},
+		"Effect": "Allow",
+		"Sid": ""
+		}
+	]
+}
+EOF
+}
+			
+resource "aws_iam_policy" "policy" {
+	policy = <<EOP
+{
+  "Version": "2012-10-17",
+	"Statement": [
+		{
+	  	"Effect": "Allow",
+		  "Action": [
+			  "ssm:DescribeAssociation",
+			  "ssm:GetDeployablePatchSnapshotForInstance",
+			  "ssm:GetDocument",
+			  "ssm:DescribeDocument",
+			  "ssm:GetManifest",
+			  "ssm:GetParameters",
+			  "ssm:ListAssociations",
+ 			  "ssm:ListInstanceAssociations",
+			  "ssm:PutInventory",
+			  "ssm:PutComplianceItems",
+			  "ssm:PutConfigurePackageResult",
+			  "ssm:UpdateAssociationStatus",
+			  "ssm:UpdateInstanceAssociationStatus",
+			  "ssm:UpdateInstanceInformation"
+			],
+		"Resource": "*"
+		},
+		{
+		  "Effect": "Allow",
+			"Action": [
+			"ssmmessages:CreateControlChannel",
+			"ssmmessages:CreateDataChannel",
+			"ssmmessages:OpenControlChannel",
+			"ssmmessages:OpenDataChannel"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"ec2messages:AcknowledgeMessage",
+			"ec2messages:DeleteMessage",
+			"ec2messages:FailMessage",
+			"ec2messages:GetEndpoint",
+			"ec2messages:GetMessages",
+			"ec2messages:SendReply"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"cloudwatch:PutMetricData"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"ec2:DescribeInstanceStatus"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"ds:CreateComputer",
+			"ds:DescribeDirectories"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"logs:CreateLogGroup",
+			"logs:CreateLogStream",
+			"logs:DescribeLogGroups",
+			"logs:DescribeLogStreams",
+			"logs:PutLogEvents"
+			],
+			"Resource": "*"
+			},
+			{
+			"Effect": "Allow",
+			"Action": [
+			"s3:GetBucketLocation",
+			"s3:PutObject",
+			"s3:GetObject",
+			"s3:GetEncryptionConfiguration",
+			"s3:AbortMultipartUpload",
+			"s3:ListMultipartUploadParts",
+			"s3:ListBucket",
+			"s3:ListBucketMultipartUploads"
+			],
+			"Resource": "*"
+			}
+			]
+			}
+			EOP
+}
+			
+resource "aws_iam_role_policy_attachment" "attachment" {
+	role = "${aws_iam_role.ec2_iam.name}"
+	policy_arn = "${aws_iam_policy.policy.arn}"
+}
+			
+resource "aws_iam_instance_profile" "ec2_profile" {
+	role = "${aws_iam_role.ec2_iam.name}"
+}
+
 resource "aws_launch_template" "ec2_launch" {
   name = "ec2-launch"
   block_device_mappings {
@@ -327,6 +448,12 @@ resource "aws_launch_template" "ec2_launch" {
 	  volume_size = 20
 	}
   }
+  
+  iam_instance_profile {
+    arn = "${aws_iam_instance_profile.ec2_profile.arn}"
+  }
+  
+  instance_initiated_shutdown_behavior = "terminate"
   
   capacity_reservation_specification {
     capacity_reservation_preference = "none"
@@ -479,6 +606,7 @@ resource "aws_db_instance" "rds" {
   engine_version = "5.7"
   instance_class = "db.t3.micro"
   username = "webadmin"
+  skip_final_snapshot = "true"
   password = "${var.mysql_pass}"
   vpc_security_group_ids = ["${aws_security_group.rds_security_group.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.rds_subnet_group.name}"
