@@ -315,10 +315,6 @@ resource "aws_launch_template" "ec2_launch" {
     cpu_credits = "standard"
   }
 
-  network_interfaces {
-    associate_public_ip_address = true
-  }
-
   instance_initiated_shutdown_behavior = "terminate"
   
   disable_api_termination = false
