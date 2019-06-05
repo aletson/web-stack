@@ -354,80 +354,80 @@ resource "aws_iam_policy" "policy" {
 			  "ssm:UpdateInstanceAssociationStatus",
 			  "ssm:UpdateInstanceInformation"
 			],
-		"Resource": "*"
+		  "Resource": "*"
 		},
 		{
 		  "Effect": "Allow",
 			"Action": [
-			"ssmmessages:CreateControlChannel",
-			"ssmmessages:CreateDataChannel",
-			"ssmmessages:OpenControlChannel",
-			"ssmmessages:OpenDataChannel"
+			  "ssmmessages:CreateControlChannel",
+			  "ssmmessages:CreateDataChannel",
+			  "ssmmessages:OpenControlChannel",
+			  "ssmmessages:OpenDataChannel"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"ec2messages:AcknowledgeMessage",
-			"ec2messages:DeleteMessage",
-			"ec2messages:FailMessage",
-			"ec2messages:GetEndpoint",
-			"ec2messages:GetMessages",
-			"ec2messages:SendReply"
+			  "ec2messages:AcknowledgeMessage",
+			  "ec2messages:DeleteMessage",
+			  "ec2messages:FailMessage",
+			  "ec2messages:GetEndpoint",
+			  "ec2messages:GetMessages",
+			  "ec2messages:SendReply"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"cloudwatch:PutMetricData"
+			  "cloudwatch:PutMetricData"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"ec2:DescribeInstanceStatus"
+			  "ec2:DescribeInstanceStatus"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"ds:CreateComputer",
-			"ds:DescribeDirectories"
+			  "ds:CreateComputer",
+			  "ds:DescribeDirectories"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"logs:CreateLogGroup",
-			"logs:CreateLogStream",
-			"logs:DescribeLogGroups",
-			"logs:DescribeLogStreams",
-			"logs:PutLogEvents"
+			  "logs:CreateLogGroup",
+			  "logs:CreateLogStream",
+			  "logs:DescribeLogGroups",
+			  "logs:DescribeLogStreams",
+			  "logs:PutLogEvents"
 			],
 			"Resource": "*"
-			},
-			{
+		},
+		{
 			"Effect": "Allow",
 			"Action": [
-			"s3:GetBucketLocation",
-			"s3:PutObject",
-			"s3:GetObject",
-			"s3:GetEncryptionConfiguration",
-			"s3:AbortMultipartUpload",
-			"s3:ListMultipartUploadParts",
-			"s3:ListBucket",
-			"s3:ListBucketMultipartUploads"
+			  "s3:GetBucketLocation",
+			  "s3:PutObject",
+			  "s3:GetObject",
+			  "s3:GetEncryptionConfiguration",
+			  "s3:AbortMultipartUpload",
+			  "s3:ListMultipartUploadParts",
+			  "s3:ListBucket",
+			  "s3:ListBucketMultipartUploads"
 			],
 			"Resource": "*"
-			}
-			]
-			}
-			EOP
+		}
+  ]
+}
+EOP
 }
 			
 resource "aws_iam_role_policy_attachment" "attachment" {
@@ -444,9 +444,9 @@ resource "aws_launch_template" "ec2_launch" {
   block_device_mappings {
     device_name = "/dev/sda1"
 	
-	ebs {
-	  volume_size = 20
-	}
+	  ebs {
+	    volume_size = 20
+	  }
   }
   
   iam_instance_profile {
