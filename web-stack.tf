@@ -545,7 +545,7 @@ resource "aws_autoscaling_group" "autoscale" {
     version = "$Latest"
   }
   health_check_grace_period = 30
-  wait_for_capacity_timeout = "300"
+  wait_for_capacity_timeout = "5m"
   min_size = 2
   max_size = 5
   desired_capacity = 2
