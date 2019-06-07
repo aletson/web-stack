@@ -1,7 +1,7 @@
 #!/bin/bash
 add-apt-repository ppa:ondrej/php
 apt-get update && apt-get upgrade -y
-apt-get install -y php7.0 php7.0-cli php7.0-common php7.0-curl php7.0-fpm php7.0-gd php7.0-json php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-readline php7.0-soap php7.0-xml php7.0-zip nginx nfs-common
+apt-get install -y php7.2 php7.2-cli php7.2-common php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mcrypt php7.2-mysql php7.2-opcache php7.2-readline php7.2-soap php7.2-xml php7.2-zip nginx nfs-common
 mkdir -p /mnt/efs
 mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${mount_point}:/ /mnt/efs
 echo "${mount_point}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,nofail 0 0" | sudo tee -a /etc/fstab
@@ -106,7 +106,7 @@ EOF_NGINX
 
 rm /etc/nginx/sites-enabled/default -f
 
-cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
+cat <<EOF_POOL > /etc/php/7.2/fpm/pool.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
 listen.allowed_clients = 127.0.0.1
@@ -133,10 +133,10 @@ if [ -d "/mnt/efs/html" ]; then
   chown www-data:www-data /mnt/efs/html -R
 fi
 
-sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
+sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini
 
-systemctl start php7.0-fpm
-systemctl enable php7.0-fpm
+systemctl start php7.2-fpm
+systemctl enable php7.2-fpm
 
 snap start amazon-ssm-agent
 
