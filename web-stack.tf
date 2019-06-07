@@ -542,7 +542,10 @@ resource "aws_autoscaling_group" "autoscale" {
   vpc_zone_identifier = ["${aws_subnet.ec2_subnet_a.id}", "${aws_subnet.ec2_subnet_b.id}", "${aws_subnet.ec2_subnet_c.id}"]
   launch_template {
     id = "${aws_launch_template.ec2_launch.id}"
+    version = "$Latest"
   }
+  health_check_grace_period = 30
+  wait_for_capacity_timeout = "300"
   min_size = 2
   max_size = 5
   desired_capacity = 2
