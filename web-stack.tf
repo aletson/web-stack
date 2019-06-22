@@ -12,33 +12,58 @@ variable "os_type" {
   default = "ubuntu-nginx" # allowable values: ubuntu-nginx, centos-apache
 }
 
-variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
-  type = "map"
-  default = {
-    "us-west-2" = "ami-04ef7170e45541f07"
-    "us-east-1" = "ami-0273df992a343e0d6"
-    "us-east-2" = "ami-033a0960d9d83ead0"
-    "us-west-1" = "ami-057a852b5ed4b66bc"
-    "ca-central-1" = "ami-044530525bc7eff8e" # Canada
-    "eu-west-1" = "ami-0ae0cb89fc578cd9c" # Ireland
-    "ap-east-1" = "ami-9ea0d8ef" # Hong Kong, I think
-    "cn-north-1" = "ami-09dd6088c3e46151c" # China
-    "sa-east-1" = "ami-0d6e00211f2547822" # South America
+#variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
+#  type = "map"
+#  default = {
+#    "us-west-2" = "ami-04ef7170e45541f07"
+#    "us-east-1" = "ami-0273df992a343e0d6"
+#    "us-east-2" = "ami-033a0960d9d83ead0"
+#    "us-west-1" = "ami-057a852b5ed4b66bc"
+#    "ca-central-1" = "ami-044530525bc7eff8e" # Canada
+#    "eu-west-1" = "ami-0ae0cb89fc578cd9c" # Ireland
+#    "ap-east-1" = "ami-9ea0d8ef" # Hong Kong, I think
+#    "cn-north-1" = "ami-09dd6088c3e46151c" # China
+#    "sa-east-1" = "ami-0d6e00211f2547822" # South America
+#  }
+#}
+
+#variable "centos_ami_id" {
+#  type = "map"
+#  default = {
+#    "us-west-2" = "ami-01ed306a12b7d1c96"
+#    "us-east-1" = "ami-02eac2c0129f6376b"
+#    "us-east-2" = "ami-0f2b4fc905b0bd1f1"
+#    "us-west-1" = "ami-074e2d6769f445be5"
+#    "ca-central-1" = "ami-033e6106180a626d0" # Canada
+#    "eu-west-1" = "ami-0ff760d16d9497662" # Ireland
+#    "ap-south-1" = "ami-02e60be79e78fef21" # Mumbai
+#    "sa-east-1" = "ami-0b8d86d4bf91850af" # South America
+#  }
+#}
+
+data "aws_ami" "centos_ami_id" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B00O7WM7QW
+  owners = ["aws-marketplace"]
+
+  filter {
+    name = "product-code"
+    values = ["aw0evgkw8e5c1q413zgy5pjce"]
   }
+
+  most_recent = true
+
 }
 
-variable "centos_ami_id" {
-  type = "map"
-  default = {
-    "us-west-2" = "ami-01ed306a12b7d1c96"
-    "us-east-1" = "ami-02eac2c0129f6376b"
-    "us-east-2" = "ami-0f2b4fc905b0bd1f1"
-    "us-west-1" = "ami-074e2d6769f445be5"
-    "ca-central-1" = "ami-033e6106180a626d0" # Canada
-    "eu-west-1" = "ami-0ff760d16d9497662" # Ireland
-    "ap-south-1" = "ami-02e60be79e78fef21" # Mumbai
-    "sa-east-1" = "ami-0b8d86d4bf91850af" # South America
+data "aws_ami" "ubuntu_ami_id" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B07CQ33QKV
+
+  owners = ["aws-marketplace"]
+
+  filter { 
+    name = "product-code"
+    values = ["3iplms73etrdhxdepv72l6ywj"]
   }
+
+  most_recent = true
+
 }
 # Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
 
