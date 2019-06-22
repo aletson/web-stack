@@ -21,7 +21,7 @@ variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
     "us-west-1" = "ami-057a852b5ed4b66bc"
     "ca-central-1" = "ami-044530525bc7eff8e" # Canada
     "eu-west-1" = "ami-0ae0cb89fc578cd9c" # Ireland
-    "ap-east-1" = "ami-9ea0d8ef" # Asia-Pacific
+    "ap-east-1" = "ami-9ea0d8ef" # Hong Kong, I think
     "cn-north-1" = "ami-09dd6088c3e46151c" # China
     "sa-east-1" = "ami-0d6e00211f2547822" # South America
   }
@@ -30,14 +30,14 @@ variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
 variable "centos_ami_id" {
   type = "map"
   default = {
-    "us-west-2" = "ami-a042f4d8"
-    "us-east-1" = "ami-4bf3d731"
-    "us-east-2" = "ami-e1496384"
-    "us-west-1" = "ami-65e0e305"
-    "ca-central-1" = "ami-dcad28b8" # Canada
-    "eu-west-1" = "ami-6e28b517" # Ireland
-    "ap-south-1" = "ami-3d9ec952" # Asia-Pacific
-    "sa-east-1" = "ami-f9adef95" # South America
+    "us-west-2" = "ami-01ed306a12b7d1c96"
+    "us-east-1" = "ami-02eac2c0129f6376b"
+    "us-east-2" = "ami-0f2b4fc905b0bd1f1"
+    "us-west-1" = "ami-074e2d6769f445be5"
+    "ca-central-1" = "ami-033e6106180a626d0" # Canada
+    "eu-west-1" = "ami-0ff760d16d9497662" # Ireland
+    "ap-south-1" = "ami-02e60be79e78fef21" # Mumbai
+    "sa-east-1" = "ami-0b8d86d4bf91850af" # South America
   }
 }
 # Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
