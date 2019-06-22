@@ -41,7 +41,7 @@ variable "os_type" {
 #  }
 #}
 
-data "aws_ami" "centos_ami_id" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B00O7WM7QW
+data "aws_ami" "centos_ami" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B00O7WM7QW
   owners = ["aws-marketplace"]
 
   filter {
@@ -53,7 +53,7 @@ data "aws_ami" "centos_ami_id" { # You must subscribe to the AMI using https://a
 
 }
 
-data "aws_ami" "ubuntu_ami_id" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B07CQ33QKV
+data "aws_ami" "ubuntu_ami" { # You must subscribe to the AMI using https://aws.amazon.com/marketplace/pp/B07CQ33QKV
 
   owners = ["aws-marketplace"]
 
@@ -492,7 +492,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "${var.os_type == "ubuntu-nginx" ? lookup(var.ubuntu_ami_id, var.primaryregion) : lookup(var.centos_ami_id, var.primaryregion)}"
+  image_id = "${var.os_type == "ubuntu-nginx" ? lookup(aws_ami.ubuntu_ami.id, var.primaryregion) : lookup(aws_ami.centos_ami.id, var.primaryregion)}"
   
   instance_type = "t3.micro"
   
