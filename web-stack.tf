@@ -492,7 +492,7 @@ resource "aws_launch_template" "ec2_launch" {
   
   ebs_optimized = true
   
-  image_id = "${var.os_type == "ubuntu-nginx" ? lookup(aws_ami.ubuntu_ami.id, var.primaryregion) : lookup(aws_ami.centos_ami.id, var.primaryregion)}"
+  image_id = "${var.os_type == "ubuntu-nginx" ? aws_ami.ubuntu_ami.id : aws_ami.centos_ami.id}"
   
   instance_type = "t3.micro"
   
