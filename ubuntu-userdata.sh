@@ -137,9 +137,9 @@ sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
 
 systemctl start php7.0-fpm
 systemctl enable php7.0-fpm
+systemctl reload php7.0-fpm
 
 snap start amazon-ssm-agent
 
-systemctl start nginx
-systemctl enable nginx
 systemctl restart nginx
+systemctl enable nginx
