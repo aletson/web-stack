@@ -449,7 +449,7 @@ resource "aws_lb_target_group" "ec2_tg" {
 
   health_check {
     path = "/"
-    matcher = "200,301,302,403,404,500"
+    matcher = "200,301,302,403,404"
   }
 
   stickiness {
