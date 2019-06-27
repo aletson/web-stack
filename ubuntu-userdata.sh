@@ -1,7 +1,7 @@
 #!/bin/bash
 add-apt-repository ppa:ondrej/php
 apt-get update && apt-get upgrade -y
-apt-get install -y php7.2 php7.2-cli php7.2-common php7.2-curl php7.2-fpm php7.2-gd php7.2-json php7.2-mbstring php7.2-mcrypt php7.2-mysql php7.2-opcache php7.2-readline php7.2-soap php7.2-xml php7.2-zip nginx nfs-common
+apt-get install -y php7.0 php7.0-cli php7.0-common php7.0-curl php7.0-fpm php7.0-gd php7.0-json php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-readline php7.0-soap php7.0-xml php7.0-zip nginx nfs-common
 mkdir -p /mnt/efs
 mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${mount_point}:/ /mnt/efs
 echo "${mount_point}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,nofail 0 0" | sudo tee -a /etc/fstab

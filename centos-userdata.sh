@@ -3,8 +3,12 @@ yum install epel-release -y
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 rpm -Uvh https://centos7.iuscommunity.org/ius-release.rpm
 yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
 yum install deltarpm -y -q
-yum install -y php70w* httpd24u httpd24u-tools httpd24u-devel policycoreutils-python ntpdate nfs-utils
+yum install -y httpd24u httpd24u-tools httpd24u-devel
+yum install -y php70w-mysqlnd php70w-opcahe php70w-pdo php70w php70w-common php70w-fpm php70w-gd php70w-mbstring php70w-mcrypt php70w-xmlrpc
+yum install -y policycoreutils-python ntpdate nfs-utils
 ntpdate pool.ntp.org
 systemctl enable ntpdate
 systemctl start ntpdate
@@ -155,7 +159,7 @@ EOF_HTTPD
 
 cat << EOF_EXPIRES > /etc/httpd/conf.modules.d/02-expires.conf
 <IfModule mod_expires.c>
-ExpiresActive On" >> /etc/httpd/conf.modules.d/02-expires.conf
+ExpiresActive On
 ExpiresByType image/jpg "access plus 1 year"
 ExpiresByType image/jpeg "access plus 1 year"
 ExpiresByType image/gif "access plus 1 year"
@@ -282,7 +286,5 @@ setsebool -P httpd_graceful_shutdown 1
 
 sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
-sudo systemctl enable amazon-ssm-agent
-sudo systemctl start amazon-ssm-agent
 systemctl start httpd
 systemctl enable httpd
