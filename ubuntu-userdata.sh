@@ -8,7 +8,7 @@ echo "${mount_point}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,har
 mkdir -p /etc/nginx/sites-available
 mkdir -p /etc/nginx/sites-enabled
 
-cat << EOF_VHOST > /etc/nginx/sites-available/${domain}.conf
+cat << "EOF_VHOST" > /etc/nginx/sites-available/${domain}.conf
 server {
   listen 80;
   server_name ${domain} www.${domain};
@@ -35,14 +35,14 @@ server {
     fastcgi_busy_buffers_size 256k;
     fastcgi_temp_file_write_size 256k;
   }
-  location ~/\.ht {
+  location ~/\.hta {
     deny all;
   }
 }
 
 EOF_VHOST
 
-cat << EOF_PARAMS > /etc/nginx/fastcgi_params
+cat << "EOF_PARAMS" > /etc/nginx/fastcgi_params
 fastcgi_param  QUERY_STRING       $query_string;
 fastcgi_param  REQUEST_METHOD     $request_method;
 fastcgi_param  CONTENT_TYPE       $content_type;
@@ -71,7 +71,7 @@ fastcgi_param  REDIRECT_STATUS    200;
 EOF_PARAMS
 ln -s /etc/nginx/sites-available/${domain}.conf /etc/nginx/sites-enabled/${domain}.conf
 
-cat <<EOF_NGINX > /etc/nginx/nginx.conf
+cat <<"EOF_NGINX" > /etc/nginx/nginx.conf
 user www-data;
 worker_processes auto;
 pid /run/nginx.pid;
@@ -106,7 +106,7 @@ EOF_NGINX
 
 rm /etc/nginx/sites-enabled/default -f
 
-cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
+cat <<"EOF_POOL" > /etc/php/7.0/fpm/pool.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
 listen.allowed_clients = 127.0.0.1
