@@ -231,7 +231,7 @@ echo "" > /etc/httpd/conf.d/php.conf
 sed -i 's/LoadModule mpm_prefork_module/#LoadModule mpm_prefork_module/' /etc/httpd/conf.modules.d/00-mpm.conf
 sed -i 's/#LoadModule mpm_event_module/LoadModule mpm_event_module/' /etc/httpd/conf.modules.d/00-mpm.conf
 
-sudo cat <<EOF_POOL > /etc/php-fpm.d/${domain}.conf
+cat <<EOF_POOL > /etc/php-fpm.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
 listen.allowed_clients = 127.0.0.1
