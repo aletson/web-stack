@@ -106,7 +106,7 @@ EOF_NGINX
 
 rm /etc/nginx/sites-enabled/default -f
 
-cat <<EOF_POOL > /etc/php/7.2/fpm/pool.d/${domain}.conf
+cat <<EOF_POOL > /etc/php/7.0/fpm/pool.d/${domain}.conf
 [${domain}]
 listen = /var/run/${domain}.sock
 listen.allowed_clients = 127.0.0.1
@@ -133,12 +133,13 @@ if [ -d "/mnt/efs/html" ]; then
   chown www-data:www-data /mnt/efs/html -R
 fi
 
-sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini
+sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
 
-systemctl start php7.2-fpm
-systemctl enable php7.2-fpm
+systemctl start php7.0-fpm
+systemctl enable php7.0-fpm
 
 snap start amazon-ssm-agent
 
 systemctl start nginx
 systemctl enable nginx
+systemctl restart nginx
