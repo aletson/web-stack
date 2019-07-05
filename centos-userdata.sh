@@ -139,18 +139,7 @@ ServerSignature Off
 ServerTokens Prod
 TraceEnable Off
 
-<Directory "/var/www/html/*/site/wp-content/uploads/">
-SetHandler none
-SetHandler default-handler
-Options -ExecCGI
-RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
-</Directory>
-<Location "/wp-content/uploads/">
-SetHandler none
-SetHandler default-handler
-Options -ExecCGI
-RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
-</Location>
+
 LogFormat "%v %h %l %u %t \"%r\" %>s %b" vhost
 CustomLog /var/log/httpd/multiple_vhost_log vhost
 
@@ -246,9 +235,9 @@ pm.max_children = 5
 pm.max_requests = 200
 pm.process_idle_timeout=10s
 
-php_admin_value[open_basedir] = /var/www/html/${domain}:/usr/share/php:/tmp:/usr/share/phpmyadmin:/etc/phpmyadmin:/var/lib/phpmyadmin
-php_admin_value[session.save_path] = /var/www/html/${domain}/tmp
-php_admin_value[upload_tmp_dir] = /var/www/html/${domain}/tmp
+php_admin_value[open_basedir] = /mnt/efs/html:/usr/share/php:/tmp:/usr/share/phpmyadmin:/etc/phpmyadmin:/var/lib/phpmyadmin
+php_admin_value[session.save_path] = /mnt/efs/html/tmp
+php_admin_value[upload_tmp_dir] = /mnt/efs/html/tmp
 EOF_POOL
 cat << EOF_FPM > /etc/php-fpm.conf
 include=/etc/php-fpm.d/*.conf
