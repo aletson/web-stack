@@ -139,18 +139,7 @@ ServerSignature Off
 ServerTokens Prod
 TraceEnable Off
 
-<Directory "/var/www/html/*/site/wp-content/uploads/">
-SetHandler none
-SetHandler default-handler
-Options -ExecCGI
-RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
-</Directory>
-<Location "/wp-content/uploads/">
-SetHandler none
-SetHandler default-handler
-Options -ExecCGI
-RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
-</Location>
+
 LogFormat "%v %h %l %u %t \"%r\" %>s %b" vhost
 CustomLog /var/log/httpd/multiple_vhost_log vhost
 
