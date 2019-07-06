@@ -16,6 +16,10 @@ variable "instance_type" {
   default = "t3.micro"
 }
 
+variable "db_instance_type" {
+  default = "db.t3.micro"
+}
+
 variable "ssh_public_key" { # public key "ssh-rsa ..... keyname"
 }
 
@@ -531,7 +535,7 @@ resource "aws_db_instance" "rds" {
   storage_type           = "gp2"
   engine                 = "mysql"
   engine_version         = "5.7"
-  instance_class         = "db.t3.micro"
+  instance_class         = var.db_instance_type
   username               = "webadmin"
   skip_final_snapshot    = "true"
   password               = var.mysql_pass
