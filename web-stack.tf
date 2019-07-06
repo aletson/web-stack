@@ -12,6 +12,24 @@ variable "os_type" {
   default = "ubuntu-nginx" # allowable values: ubuntu-nginx, centos-apache
 }
 
+variable "instance_type" {
+  default = "t3.micro"
+}
+
+variable "ssh_public_key" { # public key "ssh-rsa ..... keyname"
+}
+
+variable "aws_access_key" {
+}
+
+variable "aws_secret_key" {
+}
+
+variable "mysql_pass" {
+}
+
+# Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
+
 #variable "ubuntu_ami_id" { # Ubuntu 18.04 LTS AMI
 #  type = "map"
 #  default = {
@@ -61,20 +79,6 @@ data "aws_ami" "ubuntu_ami" {
   }
 
   most_recent = true
-}
-
-# Centos does not make China image available according to their wiki: https://wiki.centos.org/Cloud/AWS
-
-variable "ssh_public_key" { # public key "ssh-rsa ..... keyname"
-}
-
-variable "aws_access_key" {
-}
-
-variable "aws_secret_key" {
-}
-
-variable "mysql_pass" {
 }
 
 provider "aws" {
@@ -385,7 +389,7 @@ resource "aws_launch_template" "ec2_launch" {
 
   image_id = var.os_type == "ubuntu-nginx" ? data.aws_ami.ubuntu_ami.id : data.aws_ami.centos_ami.id
 
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
 
   key_name = aws_key_pair.keypair.key_name
 
