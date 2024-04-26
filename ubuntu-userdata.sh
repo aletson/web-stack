@@ -133,6 +133,10 @@ if [ -d "/mnt/efs/html" ]; then
   chown www-data:www-data /mnt/efs/html -R
 fi
 
+echo "* soft nofile 65536" >> /etc/security/limits.conf
+echo "* hard nofile 65536" >> /etc/security/limits.conf
+echo "fs.file-max = 4000000" >> /etc/sysctl.conf
+
 sed -i "s/; cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
 
 systemctl start php7.0-fpm
